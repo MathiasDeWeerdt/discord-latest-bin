@@ -31,7 +31,7 @@ git remote add aur ssh://aur@aur.archlinux.org/discord-latest-bin.git
 makepkg --printsrcinfo > .SRCINFO
 git add PKGBUILD .SRCINFO
 git commit -m "initial release"
-git push aur main
+git push aur main:master
 ```
 
 After that, `./discord-update.sh` handles everything on its own.

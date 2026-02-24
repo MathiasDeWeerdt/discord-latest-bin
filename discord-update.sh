@@ -218,7 +218,7 @@ push_to_aur() {
 
   git add PKGBUILD .SRCINFO
   git commit -m "update to ${REMOTE_VERSION}"
-  git push aur main
+  git push aur main:master
   success "pushed to AUR"
 }
 
