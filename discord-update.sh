@@ -153,9 +153,20 @@ push_to_aur() {
     return
   fi
 
+  # AUR does not allow subdirectories — push only PKGBUILD and .SRCINFO
+  # from a clean temporary repo to avoid including .github/ etc.
+  local tmpdir
+  tmpdir=$(mktemp -d)
+  git init "${tmpdir}"
+  cp PKGBUILD .SRCINFO "${tmpdir}/"
+  cd "${tmpdir}"
+  git config user.email "$(git -C "${REPO_DIR}" config user.email)"
+  git config user.name  "$(git -C "${REPO_DIR}" config user.name)"
   git add PKGBUILD .SRCINFO
   git commit -m "update to ${REMOTE_VERSION}"
-  git push aur main:master
+  git push --force "$(git -C "${REPO_DIR}" remote get-url aur)" master
+  rm -rf "${tmpdir}"
+
   success "pushed to AUR"
 }
 

@@ -75,5 +75,16 @@ jobs:
           printf '%s\n' "${{ secrets.AUR_SSH_KEY }}" > ~/.ssh/aur_key
           chmod 600 ~/.ssh/aur_key
           ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts
-          git remote add aur ssh://aur@aur.archlinux.org/discord-latest-bin.git
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/aur_key" git push aur main:master
+
+          # AUR does not allow subdirectories — push only PKGBUILD and .SRCINFO
+          # from a clean temporary repo to avoid including .github/ etc.
+          TMPDIR=$(mktemp -d)
+          git init "$TMPDIR"
+          cp PKGBUILD .SRCINFO "$TMPDIR/"
+          cd "$TMPDIR"
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add PKGBUILD .SRCINFO
+          git commit -m "update to ${VERSION}"
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/aur_key" \
+            git push --force ssh://aur@aur.archlinux.org/discord-latest-bin.git master
