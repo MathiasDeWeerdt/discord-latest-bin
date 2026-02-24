@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# discord-deb2arch — AUR package update helper
+# discord-latest-bin — AUR package update helper
 # Detects new Discord releases, updates the PKGBUILD and .SRCINFO,
 # and pushes the change to AUR.
 
@@ -21,90 +21,24 @@ fi
 
 info()    { printf "  ${BLUE}::${RESET} %s\n" "$*"; }
 success() { printf "  ${GREEN}ok${RESET}  %s\n" "$*"; }
-warn()    { printf "  ${YELLOW}# Maintainer: Mathias DeWeerdt <your@email.com>
-pkgname=discord-deb2arch
-pkgver=0.0.126
-pkgrel=1
-pkgdesc="Discord - All-in-one voice, video and text communication (latest upstream .deb release)"
-arch=('x86_64')
-url="https://discord.com"
-license=('custom')
-depends=('gtk3' 'nss' 'libxss' 'alsa-lib' 'libnotify' 'xdg-utils' 'libglvnd')
-optdepends=(
-  'libappindicator-gtk3: systray support'
-  'libayatana-appindicator: systray support'
-)
-provides=('discord')
-conflicts=('discord')
-source=("discord-${pkgver}.deb::https://stable.dl2.discordapp.net/apps/linux/${pkgver}/discord-${pkgver}.deb")
-sha256sums=('SKIP')
-
-package() {
-  cd "${srcdir}"
-  ar x "discord-${pkgver}.deb"
-
-  local data_tar
-  data_tar=$(find . -maxdepth 1 -name 'data.tar.*' | head -1)
-  [[ -n "${data_tar}" ]] || { echo "error: data.tar.* not found in .deb"; exit 1; }
-  tar xf "${data_tar}" -C "${pkgdir}"
-
-  install -Dm644 "${pkgdir}/usr/share/discord/resources/LICENSE.html" \
-    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.html" 2>/dev/null || true
-}
-EOF{RESET}  %s\n" "$*"; }
-error()   { printf "  ${RED}# Maintainer: Mathias DeWeerdt <your@email.com>
-pkgname=discord-deb2arch
-pkgver=0.0.126
-pkgrel=1
-pkgdesc="Discord - All-in-one voice, video and text communication (latest upstream .deb release)"
-arch=('x86_64')
-url="https://discord.com"
-license=('custom')
-depends=('gtk3' 'nss' 'libxss' 'alsa-lib' 'libnotify' 'xdg-utils' 'libglvnd')
-optdepends=(
-  'libappindicator-gtk3: systray support'
-  'libayatana-appindicator: systray support'
-)
-provides=('discord')
-conflicts=('discord')
-source=("discord-${pkgver}.deb::https://stable.dl2.discordapp.net/apps/linux/${pkgver}/discord-${pkgver}.deb")
-sha256sums=('SKIP')
-
-package() {
-  cd "${srcdir}"
-  ar x "discord-${pkgver}.deb"
-
-  local data_tar
-  data_tar=$(find . -maxdepth 1 -name 'data.tar.*' | head -1)
-  [[ -n "${data_tar}" ]] || { echo "error: data.tar.* not found in .deb"; exit 1; }
-  tar xf "${data_tar}" -C "${pkgdir}"
-
-  install -Dm644 "${pkgdir}/usr/share/discord/resources/LICENSE.html" \
-    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.html" 2>/dev/null || true
-}
-EOF{RESET}  %s\n" "$*" >&2; }
+warn()    { printf "  ${YELLOW}!!${RESET}  %s\n" "$*"; }
+error()   { printf "  ${RED}!!${RESET}  %s\n" "$*" >&2; }
 die()     { error "$*"; exit 1; }
 
 header() {
   local title="$*"
   printf "\n${BOLD}%s${RESET}\n" "${title}"
-  printf '%*s\n' "${#title}" '' | tr ' ' '─'
+  printf '%*s\n' "${#title}" '' | tr ' ' '-'
 }
 
 usage() {
-  cat <<EOF
-
-${BOLD}Usage:${RESET} ${SCRIPT_NAME} [OPTIONS]
-
-  Checks for a new Discord release, updates the PKGBUILD and .SRCINFO,
-  and pushes the change to AUR.
-
-${BOLD}Options:${RESET}
-  -f, --force      Update even if already on the latest version
-  -d, --dry-run    Show what would change without writing anything
-  -h, --help       Show this help and exit
-
-EOF
+  printf "\n${BOLD}Usage:${RESET} %s [OPTIONS]\n\n" "${SCRIPT_NAME}"
+  printf "  Checks for a new Discord release, updates the PKGBUILD and .SRCINFO,\n"
+  printf "  and pushes the change to AUR.\n\n"
+  printf "${BOLD}Options:${RESET}\n"
+  printf "  -f, --force      Update even if already on the latest version\n"
+  printf "  -d, --dry-run    Show what would change without writing anything\n"
+  printf "  -h, --help       Show this help and exit\n\n"
 }
 
 OPT_FORCE=false
@@ -176,7 +110,7 @@ check_version() {
 download_deb() {
   header "Downloading Discord ${REMOTE_VERSION}"
 
-  WORK_DIR=$(mktemp -d /tmp/discord-deb2arch.XXXXXX)
+  WORK_DIR=$(mktemp -d /tmp/discord-latest-bin.XXXXXX)
   DEB_FILE="${WORK_DIR}/discord-${REMOTE_VERSION}.deb"
 
   local versioned_url="https://stable.dl2.discordapp.net/apps/linux/${REMOTE_VERSION}/discord-${REMOTE_VERSION}.deb"
@@ -212,7 +146,7 @@ push_to_aur() {
 
   if ! git remote get-url aur &>/dev/null; then
     warn "No 'aur' remote configured. Add it with:"
-    info "  git remote add aur ssh://aur@aur.archlinux.org/discord-deb2arch.git"
+    info "  git remote add aur ssh://aur@aur.archlinux.org/discord-latest-bin.git"
     return
   fi
 
@@ -231,7 +165,7 @@ main() {
     download_deb
     compute_checksum
     warn "dry run — no changes written"
-    info "would update: ${CURRENT_VERSION} → ${REMOTE_VERSION}"
+    info "would update: ${CURRENT_VERSION} -> ${REMOTE_VERSION}"
     info "sha256: ${SHA256}"
     exit 0
   fi
