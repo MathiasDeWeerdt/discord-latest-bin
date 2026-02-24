@@ -72,7 +72,10 @@ check_deps() {
     fi
   done
 
-  (( ${#missing[@]} > 0 )) && { warn "Missing: ${missing[*]}"; exit 1; }
+  if (( ${#missing[@]} > 0 )); then
+    warn "Missing: ${missing[*]}"
+    exit 1
+  fi
 }
 
 resolve_remote_version() {
