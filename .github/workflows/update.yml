@@ -76,17 +76,23 @@ jobs:
 
       - name: Push to AUR
         if: steps.check.outputs.remote != ''
+        env:
+          AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.AUR_SSH_KEY }}" > ~/.ssh/aur_key
+          printenv AUR_SSH_KEY > ~/.ssh/aur_key
           chmod 600 ~/.ssh/aur_key
           ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
+          # Sanity-check the key file
+          echo "Key file lines: $(wc -l < ~/.ssh/aur_key)"
+          head -1 ~/.ssh/aur_key
+
           # Clone the existing AUR repo to build on top of its history.
           # AUR rejects force pushes and repos containing subdirectories.
           TMPDIR=$(mktemp -d)
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/aur_key -o StrictHostKeyChecking=no" \
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/aur_key -o StrictHostKeyChecking=no -v" \
             git clone ssh://aur@aur.archlinux.org/discord-latest-bin.git "$TMPDIR"
           cp PKGBUILD .SRCINFO "$TMPDIR/"
           cd "$TMPDIR"
