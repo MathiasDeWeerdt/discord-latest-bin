@@ -16,7 +16,9 @@ jobs:
 
     steps:
       - name: Install dependencies
-        run: pacman -Syu --noconfirm --needed git wget binutils
+        run: |
+          pacman -Syu --noconfirm --needed git wget binutils
+          useradd -m builder
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,7 +59,8 @@ jobs:
           sed -i "s/^pkgver=.*/pkgver=${VERSION}/" PKGBUILD
           sed -i "s/^pkgrel=.*/pkgrel=1/"          PKGBUILD
           sed -i "s/^sha256sums=.*/sha256sums=('${SHA256}')/" PKGBUILD
-          makepkg --printsrcinfo > .SRCINFO
+          chown -R builder .
+          su -c "makepkg --printsrcinfo" builder > .SRCINFO
 
       - name: Commit and push to GitHub
         if: steps.check.outputs.needs_update == 'true'
