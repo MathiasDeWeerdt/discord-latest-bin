@@ -37,6 +37,8 @@ jobs:
           echo "remote=${REMOTE}"   >> "$GITHUB_OUTPUT"
           echo "current=${CURRENT}" >> "$GITHUB_OUTPUT"
 
+          echo "VERSION=${REMOTE}" >> "$GITHUB_ENV"
+
           if [[ "$REMOTE" == "$CURRENT" ]]; then
             echo "needs_update=false" >> "$GITHUB_OUTPUT"
             echo "Already on ${CURRENT}, nothing to do."
@@ -73,7 +75,7 @@ jobs:
           git push
 
       - name: Push to AUR
-        if: steps.check.outputs.needs_update == 'true'
+        if: steps.check.outputs.remote != ''
         run: |
           mkdir -p ~/.ssh
           printf '%s\n' "${{ secrets.AUR_SSH_KEY }}" > ~/.ssh/aur_key
