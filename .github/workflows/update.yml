@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          pacman -Syu --noconfirm --needed git wget binutils
+          pacman -Syu --noconfirm --needed git wget binutils openssh
           useradd -m builder
 
       - name: Checkout
